@@ -698,9 +698,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F1F5F9] text-slate-900 flex flex-col font-sans antialiased selection:bg-[#001EE0]/15 selection:text-[#001EE0]">
+    <div className="dashboard-app min-h-screen lg:h-screen lg:overflow-hidden bg-[#F1F5F9] text-slate-900 flex flex-col font-sans antialiased selection:bg-[#001EE0]/15 selection:text-[#001EE0]">
       {/* Top Navigation Bar */}
-      <header className="h-14 flex-shrink-0 bg-white/95 backdrop-blur-xs border-b border-slate-200/90 px-4 lg:px-6 flex items-center">
+      <header className="dashboard-header h-14 flex-shrink-0 bg-white/95 backdrop-blur-xs border-b border-slate-200/90 px-4 lg:px-6 flex items-center">
         <div className="max-w-[1860px] w-full mx-auto flex items-center justify-between gap-4">
           {/* Left: Brand Identity & Segmented Network Switcher */}
           <div className="flex items-center gap-4">
@@ -797,17 +797,17 @@ export default function App() {
       </header>
 
       {}
-      <main className="flex-1 min-h-0 max-w-[1860px] w-full mx-auto px-4 lg:px-6 py-3.5 flex flex-col gap-3.5">
+      <main className="dashboard-main flex-1 min-h-0 w-full mx-auto flex flex-col">
         {/* Control Panel Toolbar + Verified Requirement Widgets */}
-        <section className="flex-shrink-0 bg-white rounded-xl border border-slate-200/90 shadow-xs p-3 flex flex-col gap-2.5">
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+        <section className="dashboard-toolbar flex-shrink-0 bg-white rounded-xl border border-slate-200/90 shadow-xs p-3 flex flex-col gap-2.5">
+          <div className="flex flex-col justify-between gap-3">
             {/* Search & Query Controls */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 readLiveContractState(contractInput, holderInput, selectedNetwork, blockTargetMode);
               }}
-              className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2.5 items-center"
+              className="dashboard-query-form flex-1 grid grid-cols-1 md:grid-cols-12 gap-2.5 items-center"
             >
               {/* Primary Contract Address Input */}
               <div className="md:col-span-5 flex items-center h-10 bg-slate-50/80 hover:bg-slate-50 focus-within:bg-white rounded-lg border border-slate-200/90 focus-within:border-[#001EE0] focus-within:ring-3 focus-within:ring-[#001EE0]/12 px-2.5 gap-2 transition-all">
@@ -882,7 +882,7 @@ export default function App() {
             </form>
 
             {/* 4 Bounty Requirement Status Widgets */}
-            <div className="flex flex-wrap items-center gap-2 xl:pl-3 xl:border-l border-slate-200 text-xs">
+            <div className="dashboard-status-row flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2 text-xs">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50/70 border border-emerald-200/80 text-slate-800">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                 <span className="font-mono text-[10px] font-bold text-emerald-700">01</span>
@@ -926,12 +926,12 @@ export default function App() {
         </section>
 
         {}
-        <section className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <section className="dashboard-columns flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* LEFT COLUMN (3 Cols): Contract Registry & State Provenance */}
-          <div className="lg:col-span-3 min-h-0 flex flex-col gap-3.5">
+          <div className="dashboard-left-column lg:col-span-3 min-h-0 flex flex-col gap-3.5">
             {/* Deployed Contracts Registry Card */}
-            <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col overflow-hidden">
-              <div className="px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between">
+            <div className="dashboard-card bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col overflow-hidden">
+              <div className="dashboard-card-header px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Box className="w-3.5 h-3.5 text-[#001EE0]" />
                   <h2 className="text-xs font-bold text-slate-900 tracking-tight">Deployed Contracts</h2>
@@ -989,9 +989,9 @@ export default function App() {
             </div>
 
             {/* Requirement 02: State Provenance & Block Snapshot Card */}
-            <div className="flex-1 min-h-0 bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden">
+            <div className="dashboard-card flex-1 min-h-0 bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden">
               <div className="flex-1 overflow-y-auto">
-                <div className="px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between">
+                <div className="dashboard-card-header px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Activity className="w-3.5 h-3.5 text-[#001EE0]" />
                     <h3 className="text-xs font-bold text-slate-900 tracking-tight">State Provenance</h3>
@@ -1074,7 +1074,7 @@ export default function App() {
               </div>
 
               {stateSnapshot && (
-                <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+                <div className="dashboard-card-actions p-3 border-t border-slate-100 bg-slate-50/50">
                   <a
                     href={`${stateSnapshot.network.explorerUrl}/address/${stateSnapshot.contractAddress}`}
                     target="_blank"
@@ -1091,10 +1091,10 @@ export default function App() {
 
           {}
           {/* CENTER COLUMN (6 Cols): Hero Contract Overview + 6 Individual Decoded State Cards */}
-          <div className="lg:col-span-6 min-h-0 flex flex-col gap-3.5">
+          <div className="dashboard-center-column lg:col-span-6 min-h-0 flex flex-col gap-3.5">
             {/* Hero Contract Overview Card */}
-            <div className="flex-shrink-0 bg-white rounded-xl border border-blue-200/80 shadow-xs overflow-hidden">
-              <div className="px-4 py-3 bg-gradient-to-r from-[#EEF2FF] via-blue-50/60 to-white border-b border-blue-100 flex flex-wrap items-center justify-between gap-2">
+            <div className="dashboard-card dashboard-hero flex-shrink-0 bg-white rounded-xl border border-blue-200/80 shadow-xs overflow-hidden">
+              <div className="dashboard-card-header px-4 py-3 bg-gradient-to-r from-[#EEF2FF] via-blue-50/60 to-white border-b border-blue-100 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-[#001EE0] text-white font-bold text-xs flex items-center justify-center shadow-2xs">
                     {stateSnapshot ? stateSnapshot.decodedSymbol.slice(0, 4) : 'PHRS'}
@@ -1224,7 +1224,7 @@ export default function App() {
                     return (
                       <div
                         key={item.id}
-                        className="bg-white rounded-xl border border-slate-200/90 hover:border-[#001EE0]/40 shadow-2xs hover:shadow-sm p-3.5 flex flex-col justify-between gap-2 transition-all group"
+                        className="dashboard-state-card bg-white rounded-xl border border-slate-200/90 hover:border-[#001EE0]/40 shadow-2xs hover:shadow-sm p-3.5 flex flex-col justify-between gap-2 transition-all group"
                       >
                         <div>
                           {/* Card Header: Icon + Number Badge + Title + Selector */}
@@ -1259,7 +1259,7 @@ export default function App() {
                           </div>
 
                           {/* Secondary Human Label / Scaling Chip */}
-                          <div className="text-[11px] font-medium text-slate-600 mt-0.5 truncate">
+                          <div className="dashboard-state-sub-label text-[11px] font-medium text-slate-600 mt-0.5 truncate">
                             {item.subLabel}
                           </div>
                         </div>
@@ -1297,9 +1297,9 @@ export default function App() {
 
           {}
           {/* RIGHT COLUMN (3 Cols): Requirement 04 Reference & Live Sample Output */}
-          <div className="lg:col-span-3 min-h-0 flex flex-col">
-            <div className="flex-1 min-h-0 bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden">
-              <div className="px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
+          <div className="dashboard-right-column lg:col-span-3 min-h-0 flex flex-col">
+            <div className="dashboard-card flex-1 min-h-0 bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden">
+              <div className="dashboard-card-header px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-3.5 h-3.5 text-[#001EE0]" />
                   <h3 className="text-xs font-bold text-slate-900 tracking-tight">README & Output</h3>
@@ -1413,7 +1413,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center gap-2 flex-shrink-0">
+              <div className="dashboard-card-actions p-3 border-t border-slate-100 bg-slate-50/50 flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => {

@@ -1,0 +1,239 @@
+.dashboard-app {
+  --panel-border: #e2e8f0;
+  --panel-radius: 14px;
+  --panel-shadow: 0 1px 2px rgb(15 23 42 / 0.035), 0 5px 18px rgb(15 23 42 / 0.025);
+  background: #f4f6fa;
+}
+
+.dashboard-header > div {
+  max-width: 1800px;
+}
+
+.dashboard-main {
+  max-width: 1760px;
+  padding: 18px 28px 22px;
+  gap: 16px;
+}
+
+.dashboard-toolbar,
+.dashboard-card {
+  border-color: var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+}
+
+.dashboard-toolbar {
+  padding: 16px;
+  gap: 12px;
+}
+
+.dashboard-query-form {
+  gap: 12px;
+}
+
+.dashboard-query-form > div:first-child,
+.dashboard-query-form > div:nth-child(2) {
+  min-height: 44px;
+  padding-inline: 12px;
+  gap: 10px;
+}
+
+.dashboard-query-form > div > button[type='submit'] {
+  min-height: 44px;
+  border-radius: 10px;
+  letter-spacing: 0.01em;
+}
+
+.dashboard-query-form input {
+  font-size: 12px;
+}
+
+.dashboard-status-row {
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.dashboard-status-row > * {
+  min-height: 34px;
+  padding-inline: 11px;
+}
+
+.dashboard-columns {
+  gap: 18px;
+}
+
+.dashboard-left-column,
+.dashboard-center-column {
+  gap: 16px;
+}
+
+.dashboard-card-header {
+  min-height: 52px;
+  padding: 13px 16px;
+}
+
+.dashboard-card-header h2,
+.dashboard-card-header h3 {
+  font-size: 13px;
+}
+
+.dashboard-state-card {
+  min-height: 150px;
+  padding: 16px;
+  gap: 12px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.035);
+}
+
+.dashboard-state-card .text-base {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.dashboard-state-card .text-xs {
+  line-height: 1.45;
+}
+
+.dashboard-state-sub-label {
+  line-height: 1.45;
+}
+
+.dashboard-card-actions {
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.dashboard-card-actions > button {
+  min-height: 40px;
+  padding-inline: 12px;
+  border-radius: 9px;
+}
+
+.dashboard-card a[href*='pharosscan'] {
+  min-height: 40px;
+  height: auto;
+  border-radius: 9px;
+}
+
+@media (min-width: 1440px) {
+  .dashboard-columns {
+    grid-template-columns: minmax(250px, 0.86fr) minmax(0, 1.8fr) minmax(290px, 0.92fr);
+    gap: 20px;
+  }
+
+  .dashboard-columns > div {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 1439px) {
+  .dashboard-app {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .dashboard-main {
+    min-height: auto;
+  }
+
+  .dashboard-columns {
+    grid-template-columns: minmax(230px, 0.8fr) minmax(0, 1.7fr);
+    align-items: start;
+  }
+
+  .dashboard-columns > div {
+    grid-column: auto;
+  }
+
+  .dashboard-right-column {
+    grid-column: 1 / -1 !important;
+    min-height: 440px;
+  }
+
+  .dashboard-right-column > .dashboard-card {
+    min-height: 440px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .dashboard-main {
+    padding: 14px 16px 20px;
+  }
+
+  .dashboard-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-columns > div,
+  .dashboard-right-column {
+    grid-column: 1 / -1 !important;
+  }
+
+  .dashboard-columns > div {
+    min-height: auto;
+  }
+
+  .dashboard-center-column > .dashboard-hero {
+    flex-shrink: 0;
+  }
+
+  .dashboard-center-column > div:last-child {
+    min-height: 720px;
+  }
+
+  .dashboard-left-column > .dashboard-card,
+  .dashboard-right-column > .dashboard-card {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-main {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .dashboard-toolbar {
+    padding: 12px;
+  }
+
+  .dashboard-state-card {
+    min-height: 132px;
+  }
+
+  .dashboard-state-sub-label {
+    white-space: normal;
+  }
+}
+
+.dashboard-app button,
+.dashboard-app a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dashboard-app button:focus-visible,
+.dashboard-app a:focus-visible,
+.dashboard-app input:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 0.38);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1023px) {
+  .dashboard-header {
+    height: auto;
+    min-height: 56px;
+    padding-block: 10px;
+  }
+
+  .dashboard-header > div {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .dashboard-header > div > div:last-child {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
