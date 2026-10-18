@@ -1117,7 +1117,7 @@ export default function App() {
                 </div>
 
                 {stateSnapshot && (
-                  <div className="flex items-center gap-2">
+                  <div className="dashboard-hero-actions flex items-center gap-2">
                     {stateSnapshot.blockOffsetMode !== 'latest' && (
                       <button
                         type="button"
@@ -1201,8 +1201,8 @@ export default function App() {
             </div>
 
             {/* Requirement 01 & 03: 6 Individual Decoded State Cards Grid */}
-            <div className="flex-1 min-h-0 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between px-1 flex-shrink-0">
+            <div className="dashboard-state-section flex-1 min-h-0 flex flex-col gap-2.5">
+              <div className="dashboard-state-section-header flex items-center justify-between px-1 flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Live Decoded State Values
@@ -1217,7 +1217,7 @@ export default function App() {
               </div>
 
               {stateSnapshot ? (
-                <div className="flex-1 min-h-0 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 pr-0.5">
+                <div className="dashboard-state-list flex-1 min-h-0 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 pr-0.5">
                   {stateSnapshot.stateValues.map((item) => {
                     const meta = STATE_CARD_META[item.id] || STATE_CARD_META.name_symbol;
                     const IconComponent = meta.icon;
@@ -1228,8 +1228,8 @@ export default function App() {
                       >
                         <div>
                           {/* Card Header: Icon + Number Badge + Title + Selector */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
+                          <div className="dashboard-state-card-header flex items-center justify-between gap-2">
+                            <div className="dashboard-state-heading flex items-center gap-2 min-w-0">
                               <div
                                 className={`w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 ${meta.iconBg}`}
                               >
@@ -1240,20 +1240,20 @@ export default function App() {
                                   <span className="font-mono text-[10px] font-bold text-[#001EE0] bg-blue-50 px-1.5 py-0.2 rounded">
                                     {item.index}
                                   </span>
-                                  <span className="text-xs font-semibold text-slate-700 truncate">
+                                  <span className="dashboard-state-title text-xs font-semibold text-slate-700 truncate">
                                     {item.title}
                                   </span>
                                 </div>
                               </div>
                             </div>
-                            <code className="text-[10px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/60 truncate max-w-[125px]">
+                            <code className="dashboard-state-selector text-[10px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/60 truncate max-w-[125px]">
                               {item.selector}
                             </code>
                           </div>
 
                           {/* Prominent Decoded Value */}
                           <div
-                            className={`text-base font-bold mt-2.5 tabular-nums tracking-tight break-words ${meta.accentText}`}
+                            className={`dashboard-state-value text-base font-bold mt-2.5 tabular-nums tracking-tight break-words ${meta.accentText}`}
                           >
                             {item.humanValue}
                           </div>
@@ -1265,15 +1265,15 @@ export default function App() {
                         </div>
 
                         {/* Card Footer: Concise Explanation & Raw Hex Copy Action */}
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-[11px]">
-                          <span className="text-slate-500 truncate" title={item.explanation}>
+                        <div className="dashboard-state-footer pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-[11px]">
+                          <span className="dashboard-state-explanation text-slate-500 truncate" title={item.explanation}>
                             {item.explanation}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleCopy(item.rawHex, item.id)}
                             title={`Copy Raw Hex: ${item.rawHex}`}
-                            className="font-mono text-[10px] font-medium px-2 py-0.5 rounded bg-slate-50 hover:bg-blue-50 text-slate-500 hover:text-[#001EE0] border border-slate-200/70 hover:border-blue-200 flex items-center gap-1 flex-shrink-0 cursor-pointer transition-colors"
+                            className="dashboard-state-copy font-mono text-[10px] font-medium px-2 py-0.5 rounded bg-slate-50 hover:bg-blue-50 text-slate-500 hover:text-[#001EE0] border border-slate-200/70 hover:border-blue-200 flex items-center gap-1 flex-shrink-0 cursor-pointer transition-colors"
                           >
                             <span>
                               {copiedId === item.id
