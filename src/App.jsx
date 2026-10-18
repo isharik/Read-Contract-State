@@ -34,7 +34,6 @@ const PHAROS_NETWORKS = {
     chainId: 688689,
     symbol: 'PHRS',
     rpcUrl: 'https://atlantic.dplabs-internal.com',
-    mcpUrl: 'https://mcp.pharos.xyz/mcp',
     explorerUrl: 'https://atlantic.pharosscan.xyz'
   },
   mainnet: {
@@ -44,7 +43,6 @@ const PHAROS_NETWORKS = {
     chainId: 1672,
     symbol: 'PROS',
     rpcUrl: 'https://rpc.pharos.xyz',
-    mcpUrl: 'https://mcp.pharos.xyz/mcp',
     explorerUrl: 'https://pharosscan.xyz'
   },
   legacyTestnet: {
@@ -54,7 +52,6 @@ const PHAROS_NETWORKS = {
     chainId: 688688,
     symbol: 'PHRS',
     rpcUrl: 'https://testnet.dplabs-internal.com',
-    mcpUrl: 'https://mcp.pharos.xyz/mcp',
     explorerUrl: 'https://testnet.pharosscan.xyz'
   }
 };
@@ -179,7 +176,7 @@ function getAddressLabel(addr, customLabel = null) {
   const lower = addr.toLowerCase();
   if (KNOWN_ADDRESS_LABELS[lower]) return KNOWN_ADDRESS_LABELS[lower];
   if (customLabel) return customLabel;
-  return `Verified Pharos Account (${addr.slice(0, 6)}...${addr.slice(-4)})`;
+  return `Address ${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
 function encodeBalanceOfCall(holderAddress) {
@@ -194,68 +191,32 @@ function encodeAllowanceCall(ownerAddress, spenderAddress) {
   return '0xdd62ed3e' + cleanOwner + cleanSpender;
 }
 
+let rpcRequestId = 0;
+
 async function callPharosRpc(rpcUrl, method, params = []) {
-  const response = await fetch(rpcUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      method,
-      params
-    })
-  });
+  const id = ++rpcRequestId;
+  let response;
+  try {
+    response = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id, method, params })
+    });
+  } catch {
+    throw new Error(`Could not reach Pharos RPC endpoint (${rpcUrl}). Check network access or CORS settings.`);
+  }
   if (!response.ok) {
     throw new Error(`RPC HTTP ${response.status}`);
   }
   const data = await response.json();
+  if (data.jsonrpc !== '2.0' || data.id !== id) {
+    throw new Error('Invalid JSON-RPC response: protocol version or request ID did not match.');
+  }
   if (data.error) {
     throw new Error(data.error.message || 'RPC execution error');
   }
+  if (!Object.hasOwn(data, 'result')) throw new Error('Invalid JSON-RPC response: missing result.');
   return data.result;
-}
-
-async function queryPharosChainMcp(mcpUrl, contractAddress, chainId, blockNumber) {
-  const start = performance.now();
-  try {
-    const response = await fetch(mcpUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json, text/event-stream'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'tools/call',
-        params: {
-          name: 'read_contract_state',
-          arguments: {
-            contractAddress,
-            chainId,
-            blockNumber
-          }
-        }
-      })
-    });
-    const latency = Math.round(performance.now() - start);
-    return {
-      endpoint: 'https://mcp.pharos.xyz/mcp',
-      transport: response.ok
-        ? 'Pharos Chain MCP (HTTP 200 Stream)'
-        : 'Pharos Chain MCP + JSON-RPC State Reader',
-      latencyMs: latency,
-      connected: true
-    };
-  } catch {
-    const latency = Math.round(performance.now() - start);
-    return {
-      endpoint: 'https://mcp.pharos.xyz/mcp',
-      transport: 'Pharos Chain MCP Spec via Live JSON-RPC',
-      latencyMs: latency,
-      connected: true
-    };
-  }
 }
 
 const PharosBrandLogo = () => {
@@ -293,7 +254,7 @@ const PharosBrandLogo = () => {
         <div className="flex items-center gap-1.5 leading-none">
           <span className="font-bold tracking-tight text-slate-950 text-sm">Pharos</span>
           <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#001EE0]/10 text-[#001EE0]">
-            Chain MCP
+            EVM RPC
           </span>
         </div>
         <span className="text-[11px] font-medium text-slate-500 mt-0.5 leading-none">
@@ -358,7 +319,6 @@ export default function App() {
   const [isProbing, setIsProbing] = useState(false);
 
   const initialLoadRef = useRef(false);
-  const currentNet = PHAROS_NETWORKS[selectedNetwork];
 
   const handleCopy = (text, id) => {
     navigator.clipboard.writeText(text);
@@ -392,6 +352,13 @@ export default function App() {
       );
 
       try {
+        const rpcStartedAt = performance.now();
+        const actualChainId = await callPharosRpc(net.rpcUrl, 'eth_chainId');
+        if (Number(hexToBigInt(actualChainId)) !== net.chainId) {
+          throw new Error(`RPC endpoint returned chain ID ${Number(hexToBigInt(actualChainId))}; expected ${net.chainId} for ${net.name}.`);
+        }
+        const rpcInfo = { latencyMs: Math.round(performance.now() - rpcStartedAt), chainId: net.chainId };
+
         // 1. Fetch latest head block number first (Requirement 02 + Time-Machine support)
         const latestBlockHex = await callPharosRpc(net.rpcUrl, 'eth_blockNumber', []);
         const latestBlockNumber = Number(hexToBigInt(latestBlockHex));
@@ -404,9 +371,8 @@ export default function App() {
         const blockHex = '0x' + targetBlockNumber.toString(16);
         const blockNumber = targetBlockNumber;
 
-        // 2. Execute live view calls + storage slot reads + bytecode check + Chain MCP query in parallel (Requirement 01)
+        // 2. Verify the RPC chain, then read contract state at the selected block.
         const [
-          mcpInfo,
           blockInfo,
           bytecodeHex,
           nativeBalanceHex,
@@ -419,7 +385,6 @@ export default function App() {
           storageSlot0Hex,
           storageSlot1Hex
         ] = await Promise.all([
-          queryPharosChainMcp(net.mcpUrl, cleanAddress, net.chainId, blockNumber),
           callPharosRpc(net.rpcUrl, 'eth_getBlockByNumber', [blockHex, false]).catch(() => null),
           callPharosRpc(net.rpcUrl, 'eth_getCode', [cleanAddress, blockHex]),
           callPharosRpc(net.rpcUrl, 'eth_getBalance', [cleanAddress, blockHex]).catch(() => '0x0'),
@@ -441,7 +406,7 @@ export default function App() {
           ),
           // owner() -> 0x8da5cb5b
           callPharosRpc(net.rpcUrl, 'eth_call', [{ to: cleanAddress, data: '0x8da5cb5b' }, blockHex]).catch(
-            () => '0x0000000000000000000000000000000000000000'
+            () => '0x'
           ),
           // balanceOf(address) -> 0x70a08231
           callPharosRpc(
@@ -465,7 +430,7 @@ export default function App() {
         const decodedName = decodeAbiString(nameRawHex) || preset?.label || 'Pharos Smart Contract';
         const decodedSymbol = decodeAbiString(symbolRawHex) || net.symbol;
         const decimalsNum = Number(hexToBigInt(decimalsRawHex));
-        const safeDecimals = decimalsNum > 0 && decimalsNum <= 36 ? decimalsNum : 18;
+        const safeDecimals = decimalsNum >= 0 && decimalsNum <= 36 ? decimalsNum : 18;
 
         const totalSupplyRaw = hexToBigInt(totalSupplyRawHex);
         const totalSupplyHuman = `${formatUnitsHuman(totalSupplyRaw, safeDecimals, 4)} ${decodedSymbol}`;
@@ -479,9 +444,12 @@ export default function App() {
         const ownerAddress = decodeAbiAddress(ownerRawHex);
         const hasExplicitOwner =
           ownerAddress && ownerAddress !== '0x0000000000000000000000000000000000000000';
+        const ownerAvailable = typeof ownerRawHex === 'string' && /^0x[0-9a-fA-F]{64}$/.test(ownerRawHex);
         const ownerHumanLabel = hasExplicitOwner
           ? getAddressLabel(ownerAddress, 'Contract Admin / Owner Account')
-          : 'Immutable Public Contract (No Central Admin / Renounced)';
+          : ownerAvailable
+            ? 'Zero address returned by owner()'
+            : 'Owner unavailable (contract may not expose owner())';
 
         const contractHumanLabel = getAddressLabel(cleanAddress, preset?.label || decodedName);
         const holderHumanLabel = getAddressLabel(cleanHolder, 'Inspected Holder / Vault Account');
@@ -539,12 +507,14 @@ export default function App() {
             selector: '0x8da5cb5b',
             humanValue: hasExplicitOwner
               ? `${ownerAddress.slice(0, 8)}...${ownerAddress.slice(-6)}`
-              : 'Immutable / Non-Custodial (0x0000...0000)',
+              : ownerAvailable ? 'owner() returned zero address' : 'owner() unavailable',
             subLabel: ownerHumanLabel,
-            rawHex: ownerRawHex === '0x' ? '0x0000000000000000000000000000000000000000' : ownerRawHex,
+            rawHex: ownerRawHex,
             explanation: hasExplicitOwner
               ? `This contract has an active owner address (${ownerAddress.slice(0, 10)}...) with administrative permissions.`
-              : 'No single admin owns this contract — its rules are autonomous and cannot be arbitrarily altered.'
+              : ownerAvailable
+                ? 'The owner() view returned the zero address. This does not by itself prove that every privileged function is disabled.'
+                : 'The owner() view call did not return a valid address; this contract may not implement that interface.'
           },
           {
             id: 'native_vault_reserve',
@@ -558,7 +528,7 @@ export default function App() {
           }
         ];
 
-        const aiAgentPromptMarkdown = `### Pharos Chain MCP — Live Contract State Context
+        const aiAgentPromptMarkdown = `### Pharos — Live Contract State Context
 - **Network**: ${net.name} (Chain ID: ${net.chainId})
 - **Contract**: ${decodedName} (${decodedSymbol}) — \`${cleanAddress}\`
 - **Label**: ${contractHumanLabel}
@@ -573,13 +543,13 @@ export default function App() {
 
         setStateSnapshot({
           network: net,
-          mcpInfo,
+          rpcInfo,
           contractAddress: cleanAddress,
           contractHumanLabel,
           category: preset?.category || 'Live Deployed Smart Contract',
           description:
             preset?.description ||
-            'Live smart contract deployed on Pharos Network, decoded in real time via Chain MCP and JSON-RPC view calls.',
+            'Live smart contract deployed on Pharos Network, decoded in real time via EVM JSON-RPC view calls.',
           blockNumber,
           latestBlockNumber,
           blockOffsetMode: targetBlockMode,
@@ -607,8 +577,8 @@ export default function App() {
             latestHeadBlockNumber: latestBlockNumber,
             readAtBlockHex: blockHex,
             chainId: net.chainId,
-            mcpEndpoint: net.mcpUrl,
             rpcEndpoint: net.rpcUrl,
+            mcp: { configured: false, reason: 'No verified Pharos MCP endpoint or tool schema is configured; reads use EVM JSON-RPC.' },
             rawViewCalls: {
               'name() [0x06fdde03]': nameRawHex,
               'symbol() [0x95d89b41]': symbolRawHex,
@@ -1076,10 +1046,10 @@ export default function App() {
 
                       <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200/60">
                         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                          MCP Latency
+                          RPC Latency
                         </div>
                         <div className="font-mono text-sm font-bold text-emerald-700 tabular-nums mt-0.5">
-                          {stateSnapshot.mcpInfo.latencyMs} ms
+                          {stateSnapshot.rpcInfo.latencyMs} ms
                         </div>
                       </div>
 
@@ -1223,7 +1193,7 @@ export default function App() {
                         <span className="font-medium text-slate-900">{stateSnapshot.ownerHumanLabel}</span>.
                       </>
                     ) : (
-                      'Querying Pharos Chain MCP and JSON-RPC view functions to translate raw contract storage into plain English...'
+                      'Reading Pharos contract state through EVM JSON-RPC...'
                     )}
                   </p>
                 </div>
@@ -1617,7 +1587,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-slate-500" />
                 <h3 className="text-xs font-semibold text-slate-900">
-                  README.md — Pharos Read Contract State via Chain MCP
+                  README.md — Pharos Read Contract State via EVM JSON-RPC
                 </h3>
               </div>
               <button
@@ -1711,7 +1681,7 @@ npm run dev`}
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-slate-500" />
                 <h3 className="text-xs font-semibold text-slate-900">
-                  Raw RPC & Chain MCP Payload (Block #{stateSnapshot.blockNumber.toLocaleString()})
+                  Raw JSON-RPC Payload (Block #{stateSnapshot.blockNumber.toLocaleString()})
                 </h3>
               </div>
               <button

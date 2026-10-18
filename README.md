@@ -1,16 +1,23 @@
-# React + Vite
+# Pharos Contract State Reader
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A browser-based React app for inspecting EVM contract state on Pharos Atlantic, Pacific, and the legacy testnet. It uses read-only JSON-RPC calls and supports historical block offsets, token metadata and balances, owner checks, raw storage slots, allowance inspection, and automatic refresh.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```sh
+npm install
+npm run dev
+```
 
-## React Compiler
+## RPC and MCP
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The reader sends standard JSON-RPC 2.0 requests directly to the configured Pharos RPC endpoint. Before reading contract data it calls `eth_chainId` and stops if the endpoint does not match the selected network. Browser access also depends on the RPC provider allowing cross-origin requests (CORS).
 
-## Expanding the Oxlint configuration
+This app does not call an MCP server. No verified Pharos MCP endpoint and contract-reader tool schema is configured in this project. MCP is a separate tool protocol; an EVM JSON-RPC endpoint is the appropriate interface for these browser-based chain reads. The app reports JSON-RPC provenance and does not present an unverified MCP request as a successful connection.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Available checks
+
+```sh
+npm run lint
+npm run build
+```
