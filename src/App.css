@@ -148,11 +148,6 @@
 
   .dashboard-right-column {
     grid-column: 1 / -1 !important;
-    min-height: 440px;
-  }
-
-  .dashboard-right-column > .dashboard-card {
-    min-height: 440px;
   }
 }
 
@@ -182,10 +177,6 @@
     min-height: 720px;
   }
 
-  .dashboard-left-column > .dashboard-card,
-  .dashboard-right-column > .dashboard-card {
-    min-height: 360px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -235,5 +226,203 @@
     width: 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
+  }
+}
+
+.dashboard-network-switcher {
+  gap: 4px;
+  padding: 4px;
+  border-radius: 11px;
+}
+
+.dashboard-network-switcher > button {
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.dashboard-header-controls {
+  gap: 10px;
+}
+
+.dashboard-header-controls > button,
+.dashboard-header-controls > a {
+  min-height: 36px;
+  padding-inline: 11px;
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.dashboard-left-column > .dashboard-card:first-child > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+}
+
+.dashboard-left-column > .dashboard-card:first-child > div:last-child > button {
+  min-height: 56px;
+  padding: 9px 11px;
+  border-radius: 9px;
+}
+
+.dashboard-left-column > .dashboard-card:first-child > div:last-child > button .text-xs {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dashboard-provenance-content {
+  padding: 16px;
+  gap: 14px;
+}
+
+.dashboard-provenance-content > div:first-child {
+  padding: 12px;
+}
+
+.dashboard-provenance-content > div:first-child > div:nth-child(2) {
+  margin-top: 7px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-provenance-content > div.grid {
+  gap: 10px;
+}
+
+.dashboard-provenance-content > div.grid > div {
+  min-width: 0;
+  padding: 11px 12px;
+  border-radius: 9px;
+}
+
+.dashboard-provenance-content > div.grid > div > div:last-child {
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.dashboard-hero > .dashboard-card-header {
+  padding: 15px 18px;
+}
+
+.dashboard-hero > div:last-child {
+  padding: 16px 18px;
+}
+
+.dashboard-hero > div:last-child p {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.dashboard-readme-content {
+  padding: 16px;
+  gap: 18px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.dashboard-readme-content > div:first-child {
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.dashboard-readme-content .font-mono {
+  line-height: 1.55;
+}
+
+.dashboard-readme-content > div:nth-child(2) > div:last-child {
+  padding: 14px;
+  border-radius: 10px;
+}
+
+.dashboard-readme-content > div:nth-child(3) > div:last-child {
+  padding: 14px;
+  border-radius: 10px;
+  line-height: 1.65;
+}
+
+.dashboard-readme-card > .dashboard-card-actions {
+  margin-top: 0;
+}
+
+.dashboard-modal-overlay {
+  padding: clamp(16px, 4vw, 36px);
+}
+
+.dashboard-modal {
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgb(15 23 42 / 0.2);
+}
+
+.dashboard-readme-modal {
+  max-width: 760px;
+}
+
+.dashboard-modal > div:first-child {
+  padding: 16px 20px;
+  min-height: 58px;
+}
+
+.dashboard-modal-body {
+  padding: 22px 24px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.dashboard-modal-body > div {
+  margin-bottom: 20px;
+}
+
+.dashboard-modal-body h4 {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.dashboard-modal-body pre {
+  padding: 16px;
+  border-radius: 10px;
+  line-height: 1.55;
+}
+
+@media (max-width: 1439px) {
+  .dashboard-provenance-card,
+  .dashboard-readme-card {
+    flex: none;
+    min-height: 0;
+  }
+
+  .dashboard-right-column {
+    min-height: 0;
+  }
+
+  .dashboard-right-column > .dashboard-readme-card {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .dashboard-header-controls {
+    gap: 8px;
+  }
+
+  .dashboard-network-switcher {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .dashboard-network-switcher > button {
+    padding-inline: 9px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-header-controls > button,
+  .dashboard-header-controls > a {
+    min-height: 38px;
+  }
+
+  .dashboard-modal-body {
+    padding: 18px 16px;
   }
 }

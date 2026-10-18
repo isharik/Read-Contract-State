@@ -706,7 +706,7 @@ export default function App() {
           <div className="flex items-center gap-4">
             <PharosBrandLogo />
             <div className="hidden sm:block h-5 w-px bg-slate-200" />
-            <div className="flex items-center bg-slate-100/90 p-1 rounded-lg border border-slate-200/80">
+            <div className="dashboard-network-switcher flex items-center bg-slate-100/90 p-1 rounded-lg border border-slate-200/80">
               {Object.values(PHAROS_NETWORKS).map((net) => {
                 const isActive = selectedNetwork === net.id;
                 return (
@@ -736,7 +736,7 @@ export default function App() {
           </div>
 
           {/* Right: Live Block Badge, Auto-Sync Toggle & Action Links */}
-          <div className="flex items-center gap-2 text-xs">
+          <div className="dashboard-header-controls flex items-center gap-2 text-xs">
             {/* Live Auto-Sync Toggle */}
             <button
               type="button"
@@ -989,8 +989,8 @@ export default function App() {
             </div>
 
             {/* Requirement 02: State Provenance & Block Snapshot Card */}
-            <div className="dashboard-card flex-1 min-h-0 bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden">
-              <div className="flex-1 overflow-y-auto">
+            <div className="dashboard-card dashboard-provenance-card bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col overflow-hidden">
+              <div>
                 <div className="dashboard-card-header px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Activity className="w-3.5 h-3.5 text-[#001EE0]" />
@@ -1002,7 +1002,7 @@ export default function App() {
                 </div>
 
                 {stateSnapshot ? (
-                  <div className="p-3.5 space-y-3 text-xs">
+                  <div className="dashboard-provenance-content p-3.5 space-y-3 text-xs">
                     {/* Active Contract Address Box */}
                     <div className="p-2.5 rounded-lg bg-[#F8FAFC] border border-slate-200/80">
                       <div className="flex items-center justify-between mb-1">
@@ -1298,7 +1298,7 @@ export default function App() {
           {}
           {/* RIGHT COLUMN (3 Cols): Requirement 04 Reference & Live Sample Output */}
           <div className="dashboard-right-column lg:col-span-3 min-h-0 flex flex-col">
-            <div className="dashboard-card flex-1 min-h-0 bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden">
+            <div className="dashboard-card dashboard-readme-card bg-white rounded-xl border border-slate-200/90 shadow-xs flex flex-col overflow-hidden">
               <div className="dashboard-card-header px-4 py-3 bg-gradient-to-r from-slate-50/90 to-blue-50/40 border-b border-slate-200/80 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-3.5 h-3.5 text-[#001EE0]" />
@@ -1314,7 +1314,7 @@ export default function App() {
                 </button>
               </div>
 
-              <div className="p-3.5 flex-1 overflow-y-auto space-y-3.5 text-xs">
+              <div className="dashboard-readme-content p-3.5 space-y-3.5 text-xs">
                 {/* 1. Chosen Contracts */}
                 <div className="p-2.5 rounded-lg bg-blue-50/40 border border-blue-200/60">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[#001EE0] mb-1">
@@ -1454,8 +1454,8 @@ export default function App() {
       {}
       {/* Modal 3 (Bonus Feature): Live Storage Slot & ERC-20 Allowance Explorer */}
       {activeModal === 'sandbox' && stateSnapshot && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-lg overflow-hidden">
+        <div className="dashboard-modal-overlay fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4">
+          <div className="dashboard-modal bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-lg overflow-hidden">
             <div className="px-5 py-3.5 bg-gradient-to-r from-[#EEF2FF] to-white border-b border-blue-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-[#001EE0]" />
@@ -1581,8 +1581,8 @@ export default function App() {
 
       {/* Modal 1: Full Interactive README & Sample Output (Requirement 04) */}
       {activeModal === 'readme' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-lg overflow-hidden">
+        <div className="dashboard-modal-overlay fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4">
+          <div className="dashboard-modal dashboard-readme-modal bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-lg overflow-hidden">
             <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-slate-500" />
@@ -1599,7 +1599,7 @@ export default function App() {
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto text-xs text-slate-600 space-y-4 leading-relaxed">
+            <div className="dashboard-modal-body p-5 overflow-y-auto text-xs text-slate-600 space-y-4 leading-relaxed">
               <div>
                 <h4 className="font-semibold text-slate-900 text-sm">1. Which Contract We Chose</h4>
                 <p className="mt-1">
@@ -1675,8 +1675,8 @@ npm run dev`}
 
       {/* Modal 2: Raw Storage & View Call Hex Payload vs Human Formatted Output */}
       {activeModal === 'raw' && stateSnapshot && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-lg overflow-hidden">
+        <div className="dashboard-modal-overlay fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[1px] flex items-center justify-center p-4">
+          <div className="dashboard-modal bg-white rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-lg overflow-hidden">
             <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-slate-500" />
