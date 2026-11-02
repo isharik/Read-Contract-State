@@ -27,15 +27,6 @@ import {
 } from 'lucide-react';
 
 const PHAROS_NETWORKS = {
-  atlantic: {
-    id: 'atlantic',
-    name: 'Pharos Atlantic Testnet',
-    shortName: 'Atlantic Testnet',
-    chainId: 688689,
-    symbol: 'PHRS',
-    rpcUrl: 'https://atlantic.dplabs-internal.com',
-    explorerUrl: 'https://atlantic.pharosscan.xyz'
-  },
   mainnet: {
     id: 'mainnet',
     name: 'Pharos Pacific Mainnet',
@@ -44,48 +35,23 @@ const PHAROS_NETWORKS = {
     symbol: 'PROS',
     rpcUrl: 'https://rpc.pharos.xyz',
     explorerUrl: 'https://pharosscan.xyz'
-  },
-  legacyTestnet: {
-    id: 'legacyTestnet',
-    name: 'Pharos Legacy Testnet',
-    shortName: 'Testnet (688688)',
-    chainId: 688688,
-    symbol: 'PHRS',
-    rpcUrl: 'https://testnet.dplabs-internal.com',
-    explorerUrl: 'https://testnet.pharosscan.xyz'
   }
 };
 
-// Official Deployed Contracts on Pharos Atlantic Testnet (from docs.pharos.xyz/getting-started/token-registry)
 const DEPLOYED_PHAROS_CONTRACTS = [
   {
-    address: '0x838800b758277CC111B2d48Ab01e5E164f8E9471',
-    label: 'Wrapped Pharos (WPHRS) Vault',
-    category: 'Canonical Wrapped Native Token Vault',
-    network: 'atlantic',
-    description: 'Holds native PHRS deposits and mints 1:1 ERC-20 WPHRS tokens for DeFi protocols on Pharos Atlantic Testnet.',
-    defaultHolder: '0x838800b758277CC111B2d48Ab01e5E164f8E9471'
-  },
-  {
-    address: '0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B',
-    label: 'USD Coin (USDC) Official Token',
-    category: 'Stablecoin Contract',
-    network: 'atlantic',
-    description: 'Official 6-decimal USD stablecoin contract deployed on Pharos Atlantic Testnet for swaps and lending.',
-    defaultHolder: '0x838800b758277CC111B2d48Ab01e5E164f8E9471'
-  },
-  {
-    address: '0x5982c78b75a269732d8528f5A4d9B52a699a2792',
-    label: 'Tether USD (USDT) Official Token',
-    category: 'Stablecoin Contract',
-    network: 'atlantic',
-    description: 'Official Tether USD ERC-20 token contract deployed on Pharos Atlantic Testnet.',
-    defaultHolder: '0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B'
+    address: '0x51e2A24742Db77604B881d6781Ee16B5b8fcBE29',
+    label: 'Chainlink Token (LINK)',
+    category: 'ERC-20 Token',
+    network: 'mainnet',
+    description: 'LINK token contract on Pharos Pacific Mainnet.',
+    defaultHolder: '0x51e2A24742Db77604B881d6781Ee16B5b8fcBE29'
   }
 ];
 
 // Human-friendly labels for known Pharos addresses (Requirement 03: addresses labelled)
 const KNOWN_ADDRESS_LABELS = {
+  '0x51e2a24742db77604b881d6781ee16b5b8fcbe29': 'Chainlink Token on Pharos Mainnet',
   '0x838800b758277cc111b2d48ab01e5e164f8e9471': 'Official Pharos WPHRS Vault Contract',
   '0xcfc8330f4bcab529c625d12781b1c19466a9fc8b': 'Official Pharos USDC Stablecoin Contract',
   '0x5982c78b75a269732d8528f5a4d9b52a699a2792': 'Official Pharos USDT Stablecoin Contract',
@@ -193,20 +159,21 @@ function encodeAllowanceCall(ownerAddress, spenderAddress) {
 
 let rpcRequestId = 0;
 
-async function callPharosRpc(rpcUrl, method, params = []) {
+async function callPharosRpc(_rpcUrl, method, params = []) {
   const id = ++rpcRequestId;
   let response;
   try {
-    response = await fetch(rpcUrl, {
+    response = await fetch('/api/read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ jsonrpc: '2.0', id, method, params })
     });
   } catch {
-    throw new Error(`Could not reach Pharos RPC endpoint (${rpcUrl}). Check network access or CORS settings.`);
+    throw new Error('Could not reach the Chain MCP bridge.');
   }
   if (!response.ok) {
-    throw new Error(`RPC HTTP ${response.status}`);
+    const failure = await response.json().catch(() => ({}));
+    throw new Error(failure.error || `Chain MCP bridge returned HTTP ${response.status}`);
   }
   const data = await response.json();
   if (data.jsonrpc !== '2.0' || data.id !== id) {
@@ -254,7 +221,7 @@ const PharosBrandLogo = () => {
         <div className="flex items-center gap-1.5 leading-none">
           <span className="font-bold tracking-tight text-slate-950 text-sm">Pharos</span>
           <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#001EE0]/10 text-[#001EE0]">
-            EVM RPC
+            Chain MCP
           </span>
         </div>
         <span className="text-[11px] font-medium text-slate-500 mt-0.5 leading-none">
@@ -299,7 +266,7 @@ const STATE_CARD_META = {
 };
 
 export default function App() {
-  const [selectedNetwork, setSelectedNetwork] = useState('atlantic');
+  const [selectedNetwork, setSelectedNetwork] = useState('mainnet');
   const [contractInput, setContractInput] = useState(DEPLOYED_PHAROS_CONTRACTS[0].address);
   const [holderInput, setHolderInput] = useState(DEPLOYED_PHAROS_CONTRACTS[0].defaultHolder);
   const [isReading, setIsReading] = useState(false);
@@ -314,7 +281,7 @@ export default function App() {
   const [autoSync, setAutoSync] = useState(false);
   // Bonus Feature 3: Interactive Storage Slot & Allowance Inspector
   const [customSlotInput, setCustomSlotInput] = useState('0x0');
-  const [customSpenderInput, setCustomSpenderInput] = useState('0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B');
+  const [customSpenderInput, setCustomSpenderInput] = useState(DEPLOYED_PHAROS_CONTRACTS[0].address);
   const [customProbeResult, setCustomProbeResult] = useState(null);
   const [isProbing, setIsProbing] = useState(false);
 
@@ -549,7 +516,7 @@ export default function App() {
           category: preset?.category || 'Live Deployed Smart Contract',
           description:
             preset?.description ||
-            'Live smart contract deployed on Pharos Network, decoded in real time via EVM JSON-RPC view calls.',
+            'Live smart contract deployed on Pharos Mainnet, read through Chain MCP.',
           blockNumber,
           latestBlockNumber,
           blockOffsetMode: targetBlockMode,
@@ -577,8 +544,8 @@ export default function App() {
             latestHeadBlockNumber: latestBlockNumber,
             readAtBlockHex: blockHex,
             chainId: net.chainId,
-            rpcEndpoint: net.rpcUrl,
-            mcp: { configured: false, reason: 'No verified Pharos MCP endpoint or tool schema is configured; reads use EVM JSON-RPC.' },
+            dataSource: 'Pharos Chain MCP',
+            mcp: { configured: true, endpoint: 'https://mcp.pharos.xyz/mcp', transport: 'Streamable HTTP' },
             rawViewCalls: {
               'name() [0x06fdde03]': nameRawHex,
               'symbol() [0x95d89b41]': symbolRawHex,
@@ -602,7 +569,7 @@ export default function App() {
           }
         });
       } catch (err) {
-        setErrorMsg(err.message || 'Failed to read contract state from Pharos RPC.');
+        setErrorMsg(err.message || 'Failed to read contract state through Chain MCP.');
       } finally {
         setIsReading(false);
       }
@@ -622,7 +589,7 @@ export default function App() {
 
       const spenderClean = /^0x[a-fA-F0-9]{40}$/.test(customSpenderInput.trim())
         ? customSpenderInput.trim()
-        : DEPLOYED_PHAROS_CONTRACTS[1].address;
+        : DEPLOYED_PHAROS_CONTRACTS[0].address;
 
       const [slotRawHex, allowanceRawHex] = await Promise.all([
         callPharosRpc(stateSnapshot.network.rpcUrl, 'eth_getStorageAt', [
@@ -670,7 +637,7 @@ export default function App() {
       readLiveContractState(
         DEPLOYED_PHAROS_CONTRACTS[0].address,
         DEPLOYED_PHAROS_CONTRACTS[0].defaultHolder,
-        'atlantic',
+        'mainnet',
         'latest'
       );
     }
@@ -937,7 +904,7 @@ export default function App() {
                   <h2 className="text-xs font-bold text-slate-900 tracking-tight">Deployed Contracts</h2>
                 </div>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-[#001EE0] border border-blue-200/60">
-                  Atlantic
+                  Mainnet
                 </span>
               </div>
 
@@ -1046,7 +1013,7 @@ export default function App() {
 
                       <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200/60">
                         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                          RPC Latency
+                          MCP Latency
                         </div>
                         <div className="font-mono text-sm font-bold text-emerald-700 tabular-nums mt-0.5">
                           {stateSnapshot.rpcInfo.latencyMs} ms
@@ -1111,7 +1078,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="text-[11px] font-medium text-slate-500">
-                      {stateSnapshot ? stateSnapshot.category : 'Connecting to Pharos RPC...'}
+                      {stateSnapshot ? stateSnapshot.category : 'Connecting to Pharos Chain MCP...'}
                     </div>
                   </div>
                 </div>
@@ -1193,7 +1160,7 @@ export default function App() {
                         <span className="font-medium text-slate-900">{stateSnapshot.ownerHumanLabel}</span>.
                       </>
                     ) : (
-                      'Reading Pharos contract state through EVM JSON-RPC...'
+                      'Reading Pharos contract state through Chain MCP...'
                     )}
                   </p>
                 </div>
@@ -1321,11 +1288,9 @@ export default function App() {
                     1. Chosen Contracts
                   </div>
                   <p className="text-slate-700 leading-relaxed text-[11px]">
-                    Reads live state from official <strong>WPHRS Vault</strong> (
-                    <code className="font-mono text-[#001EE0] font-semibold">0x8388...9471</code>) and{' '}
-                    <strong>USDC Token</strong> (
-                    <code className="font-mono text-[#001EE0] font-semibold">0xcfC8...Fc8B</code>) on Pharos
-                    Atlantic Testnet (<code className="font-mono">688689</code>).
+                    Reads the <strong>LINK token</strong> (
+                    <code className="font-mono text-[#001EE0] font-semibold">0x51e2...BE29</code>) on Pharos
+                    Mainnet (<code className="font-mono">1672</code>) through Chain MCP.
                   </p>
                 </div>
 
@@ -1587,7 +1552,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-slate-500" />
                 <h3 className="text-xs font-semibold text-slate-900">
-                  README.md — Pharos Read Contract State via EVM JSON-RPC
+                  README.md — Pharos Read Contract State via Chain MCP
                 </h3>
               </div>
               <button
@@ -1603,15 +1568,11 @@ export default function App() {
               <div>
                 <h4 className="font-semibold text-slate-900 text-sm">1. Which Contract We Chose</h4>
                 <p className="mt-1">
-                  We chose the official deployed <strong>Wrapped Pharos (WPHRS) Vault Contract</strong> (
+                  We chose the deployed <strong>Chainlink Token (LINK)</strong> (
                   <code className="font-mono text-slate-900">
-                    0x838800b758277CC111B2d48Ab01e5E164f8E9471
+                    0x51e2A24742Db77604B881d6781Ee16B5b8fcBE29
                   </code>
-                  ) and <strong>USD Coin (USDC)</strong> (
-                  <code className="font-mono text-slate-900">
-                    0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B
-                  </code>
-                  ) on the live <strong>Pharos Atlantic Testnet (Chain ID: 688689)</strong>, as well as supporting any
+                  ) on <strong>Pharos Mainnet (Chain ID: 1672)</strong>, as well as supporting any
                   custom public contract address pasted by the user.
                 </p>
               </div>
@@ -1681,7 +1642,7 @@ npm run dev`}
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-slate-500" />
                 <h3 className="text-xs font-semibold text-slate-900">
-                  Raw JSON-RPC Payload (Block #{stateSnapshot.blockNumber.toLocaleString()})
+                  Chain MCP Read Payload (Block #{stateSnapshot.blockNumber.toLocaleString()})
                 </h3>
               </div>
               <button
