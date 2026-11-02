@@ -20,6 +20,8 @@ npm run build
 npm start
 ```
 
+For Vercel, deploy this repository with the Vite build command (`npm run build`) and `dist` as the output directory. The `api/read.js` function provides the `/api/read` route there. A static-only host such as GitHub Pages cannot run that function; use a Node host running `npm start` or a host that supports the included serverless route.
+
 Set `PORT` to change the listening port. `PHAROS_MCP_URL` can point to a self-hosted compatible Pharos MCP server; it defaults to `https://mcp.pharos.xyz/mcp`.
 
 ## Data path

@@ -1036,7 +1036,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 text-xs text-slate-500">Syncing live block provenance...</div>
+                  <div className="p-4 text-xs text-slate-500">{errorMsg || 'Syncing live block provenance...'}</div>
                 )}
               </div>
 
@@ -1255,8 +1255,9 @@ export default function App() {
                   })}
                 </div>
               ) : (
-                <div className="flex-1 bg-white rounded-xl border border-slate-200/90 flex items-center justify-center text-xs text-slate-500">
-                  Fetching live contract state from Pharos...
+                <div className="flex-1 bg-white rounded-xl border border-slate-200/90 flex flex-col items-center justify-center gap-3 p-6 text-xs text-slate-500 text-center">
+                  <span>{errorMsg || 'Fetching live contract state through Chain MCP...'}</span>
+                  {errorMsg && <button type="button" onClick={() => readLiveContractState()} className="rounded-lg bg-[#001EE0] px-4 py-2 font-semibold text-white">Retry read</button>}
                 </div>
               )}
             </div>
